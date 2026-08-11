@@ -1,0 +1,3 @@
+package rssaggregator
+
+func main()
