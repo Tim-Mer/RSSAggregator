@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -11,6 +12,15 @@ const configFileName = ".gatorconfig.json"
 type Config struct {
 	DbURL           string `json:"db_url"`
 	CurrentUserName string `json:"current_user_name"`
+}
+
+type state struct {
+	configPtr *Config
+}
+
+type command struct {
+	name string
+	args []string
 }
 
 func getConfigFilePath() (string, error) {
@@ -60,4 +70,12 @@ func write(c Config) error {
 func (c Config) SetUser(user string) error {
 	c.CurrentUserName = user
 	return write(c)
+}
+
+func handlerLogin(s *state, cmd command) error {
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("Wrong number of arguments passed, expects username only")
+	}
+	fmt.Printf("User has been set to: %s", cmd.args[0])
+	return s.configPtr.SetUser(cmd.args[0])
 }
