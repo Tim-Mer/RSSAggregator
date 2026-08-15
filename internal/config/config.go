@@ -23,6 +23,10 @@ type command struct {
 	args []string
 }
 
+type commands struct {
+	cmdMap map[string]func(*state, command) error
+}
+
 func getConfigFilePath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -78,4 +82,9 @@ func handlerLogin(s *state, cmd command) error {
 	}
 	fmt.Printf("User has been set to: %s", cmd.args[0])
 	return s.configPtr.SetUser(cmd.args[0])
+}
+
+func (c *commands) run(s *state, cmd command) error {
+	
+	return nil
 }
