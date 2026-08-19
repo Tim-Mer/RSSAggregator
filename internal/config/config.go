@@ -14,17 +14,17 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
-type state struct {
-	configPtr *Config
+type State struct {
+	ConfigPtr *Config
 }
 
-type command struct {
-	name string
-	args []string
+type Command struct {
+	Name string
+	Args []string
 }
 
-type commands struct {
-	cmdMap map[string]func(*state, command) error
+type Commands struct {
+	cmdMap map[string]func(*State, Command) error
 }
 
 func getConfigFilePath() (string, error) {
@@ -76,18 +76,24 @@ func (c Config) SetUser(user string) error {
 	return write(c)
 }
 
-func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) != 1 {
+func handlerLogin(s *State, cmd Command) error {
+	if len(cmd.Args) != 1 {
 		return fmt.Errorf("Wrong number of arguments passed, expects username only")
 	}
-	fmt.Printf("User has been set to: %s", cmd.args[0])
-	return s.configPtr.SetUser(cmd.args[0])
+	fmt.Printf("User has been set to: %s\n", cmd.Args[0])
+	return s.ConfigPtr.SetUser(cmd.Args[0])
 }
 
-func (c *commands) run(s *state, cmd command) error {
-	return c.cmdMap[cmd.name](s, cmd)
+func (c *Commands) Run(s *State, cmd Command) error {
+	return c.cmdMap[cmd.Name](s, cmd)
 }
 
-func (c *commands) register(name string, f func(*state, command) error) {
+func (c *Commands) register(name string, f func(*State, Command) error) {
 	c.cmdMap[name] = f
+}
+
+func (c *Commands) Initialise() error {
+	c.cmdMap = make(map[string]func(*State, Command) error)
+	c.register("login", handlerLogin)
+	return nil
 }
