@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Tim-Mer/RSSAggregator/internal/config"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -34,3 +35,5 @@ func main() {
 
 	os.Exit(0)
 }
+
+//"postgres://postgres:postgres@localhost:5432/gator"
