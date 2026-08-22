@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/Tim-Mer/RSSAggregator/internal/config"
+	"github.com/Tim-Mer/RSSAggregator/internal/database"
 	_ "github.com/lib/pq"
 )
 
@@ -32,6 +34,9 @@ func main() {
 	}
 
 	err = commands.Run(&state, cmd)
+
+	db, err := sql.Open("postgres", state.ConfigPtr.DbURL)
+	dbQueries := database.New(db)
 
 	os.Exit(0)
 }

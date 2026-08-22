@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/Tim-Mer/RSSAggregator/internal/database"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -16,6 +18,7 @@ type Config struct {
 
 type State struct {
 	ConfigPtr *Config
+	db        *database.Queries
 }
 
 type Command struct {
