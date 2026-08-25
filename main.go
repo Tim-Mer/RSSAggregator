@@ -10,33 +10,40 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type state struct {
+	ConfigPtr *config.Config
+	DB        *database.Queries
+}
+
 func main() {
 	args := os.Args
-	if len(args) <= 2 {
-		fmt.Println("Error: Not enough args passed")
-		os.Exit(1)
-	}
-	cmd := config.Command{
+	cmd := command{
 		Name: os.Args[1],
 		Args: args[2:],
 	}
 
 	c, err := config.Read()
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	state := config.State{ConfigPtr: &c}
-	commands := config.Commands{}
+	state := state{ConfigPtr: &c}
+	commands := commands{}
 	if err := commands.Initialise(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	err = commands.Run(&state, cmd)
-
 	db, err := sql.Open("postgres", state.ConfigPtr.DbURL)
 	dbQueries := database.New(db)
+	state.DB = dbQueries
+
+	err = commands.Run(&state, cmd)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	os.Exit(0)
 }

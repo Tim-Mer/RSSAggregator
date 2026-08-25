@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/Tim-Mer/RSSAggregator/internal/database"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -14,20 +12,6 @@ const configFileName = ".gatorconfig.json"
 type Config struct {
 	DbURL           string `json:"db_url"`
 	CurrentUserName string `json:"current_user_name"`
-}
-
-type State struct {
-	ConfigPtr *Config
-	db        *database.Queries
-}
-
-type Command struct {
-	Name string
-	Args []string
-}
-
-type Commands struct {
-	cmdMap map[string]func(*State, Command) error
 }
 
 func getConfigFilePath() (string, error) {
@@ -75,28 +59,7 @@ func write(c Config) error {
 }
 
 func (c Config) SetUser(user string) error {
+	fmt.Printf("User has been set to: %s\n", user)
 	c.CurrentUserName = user
 	return write(c)
-}
-
-func handlerLogin(s *State, cmd Command) error {
-	if len(cmd.Args) != 1 {
-		return fmt.Errorf("Wrong number of arguments passed, expects username only")
-	}
-	fmt.Printf("User has been set to: %s\n", cmd.Args[0])
-	return s.ConfigPtr.SetUser(cmd.Args[0])
-}
-
-func (c *Commands) Run(s *State, cmd Command) error {
-	return c.cmdMap[cmd.Name](s, cmd)
-}
-
-func (c *Commands) register(name string, f func(*State, Command) error) {
-	c.cmdMap[name] = f
-}
-
-func (c *Commands) Initialise() error {
-	c.cmdMap = make(map[string]func(*State, Command) error)
-	c.register("login", handlerLogin)
-	return nil
 }
