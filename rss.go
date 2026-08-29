@@ -1,6 +1,12 @@
 package main
 
-import "context"
+import (
+	"context"
+	"encoding/xml"
+	"html"
+	"io"
+	"net/http"
+)
 
 type RSSFeed struct {
 	Channel struct {
@@ -19,10 +25,30 @@ type RSSItem struct {
 }
 
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
-	// http.NewRequestWithContext 
+	client := http.Client{}
+	// http.NewRequestWithContext
+	request, err := http.NewRequestWithContext(ctx, "GET", feedURL, nil)
+	if err != nil {
+		return nil, err
+	}
 	// http.Client.Do
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
 	// request.Header.Set
+	request.Header.Set("User-Agent", "gator")
 	// io.ReadAll
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
 	// xml.Unmarshal (works the same as json.Unmarshal)
-	return nil, nil
+	var feed RSSFeed
+	if err := xml.Unmarshal(body, &feed); err != nil {
+		return nil, err
+	}
+	feed.Channel.Title = html.UnescapeString(feed.Channel.Title)
+	feed.Channel.Description = html.UnescapeString(feed.Channel.Description)
+	return &feed, nil
 }
