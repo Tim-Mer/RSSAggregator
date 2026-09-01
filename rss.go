@@ -38,7 +38,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 	// request.Header.Set
 	request.Header.Set("User-Agent", "gator")
-	// io.ReadAll
+	// io.ReadAll 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
