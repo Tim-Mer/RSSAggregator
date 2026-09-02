@@ -52,3 +52,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	feed.Channel.Description = html.UnescapeString(feed.Channel.Description)
 	return &feed, nil
 }
+
+func AddFeed(name string, url string) error {
+	return nil
+}

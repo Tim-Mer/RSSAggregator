@@ -24,5 +24,6 @@ func (c *commands) Initialise() error {
 	c.register("reset", handlerReset)
 	c.register("users", handlerListUsers)
 	c.register("agg", handlerAgg)
+	c.register("addfeed", handlerAddFeed)
 	return nil
 }

@@ -65,3 +65,8 @@ func handlerAgg(s *state, cmd command) error {
 	fmt.Println(feed)
 	return nil
 }
+
+func handlerAddFeed(s *state, cmd command) error {
+	
+	return nil
+}
