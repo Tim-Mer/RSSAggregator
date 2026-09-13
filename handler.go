@@ -68,5 +68,7 @@ func handlerAgg(s *state, cmd command) error {
 
 func handlerAddFeed(s *state, cmd command) error {
 	// Add stuff here
+	// Get current user and attach feed
+	// print fields from new feeds record
 	return nil
 }
