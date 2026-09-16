@@ -38,7 +38,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 	// request.Header.Set
 	request.Header.Set("User-Agent", "gator")
-	// io.ReadAll 
+	// io.ReadAll
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
@@ -51,8 +51,4 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	feed.Channel.Title = html.UnescapeString(feed.Channel.Title)
 	feed.Channel.Description = html.UnescapeString(feed.Channel.Description)
 	return &feed, nil
-}
-
-func AddFeed(name string, url string) error {
-	return nil
 }

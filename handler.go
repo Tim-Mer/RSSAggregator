@@ -67,8 +67,28 @@ func handlerAgg(s *state, cmd command) error {
 }
 
 func handlerAddFeed(s *state, cmd command) error {
-	// Add stuff here
-	// Get current user and attach feed
-	// print fields from new feeds record
+	if len(cmd.Args) != 2 {
+		return fmt.Errorf("Wrong number of arguments passed, expects feed name and URL")
+	}
+
+	c_user, err := s.DB.GetUser(context.Background(), s.ConfigPtr.CurrentUserName)
+	if err != nil {
+		return err
+	}
+
+	feed, err := s.DB.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      cmd.Args[0],
+		Url:       cmd.Args[1],
+		UserID:    c_user.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(feed)
+
 	return nil
 }
