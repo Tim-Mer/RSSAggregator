@@ -94,5 +94,14 @@ func handlerAddFeed(s *state, cmd command) error {
 }
 
 func handlerFeeds(s *state, cmd command) error {
+	fIDs, err := s.DB.GetFeedIDs(context.Background())
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fIDs)
+	// Call GETFeedWithID to return each feed
+	// From there extract the name, URL and user
+	// For the user will need to get the username from the users table using the user ID from the feeds table
 	return nil
 }

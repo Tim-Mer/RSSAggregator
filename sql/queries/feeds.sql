@@ -9,3 +9,10 @@ VALUES (
     $6
 )
 RETURNING *;
+
+-- name: GetFeedIDs :many
+SELECT id FROM feeds;
+
+-- name: GetFeedWithID :one
+SELECT * FROM feeds
+
