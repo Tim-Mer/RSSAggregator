@@ -86,7 +86,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	})
 	if err != nil {
 		return err
-	}
+	} 
 
 	fmt.Println(feed)
 
