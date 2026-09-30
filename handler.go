@@ -96,7 +96,7 @@ func handlerAddFeed(s *state, cmd command) error {
 func handlerFeeds(s *state, cmd command) error {
 	fIDs, err := s.DB.GetFeedIDs(context.Background())
 	if err != nil {
-		return err 
+		return err
 	}
 
 	fmt.Println(fIDs)
