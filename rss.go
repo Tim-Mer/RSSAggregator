@@ -33,7 +33,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 	// http.Client.Do
 	response, err := client.Do(request)
-	if err != nil {
+	if err != nil { 
 		return nil, err
 	}
 	// request.Header.Set
