@@ -8,7 +8,7 @@ type command struct {
 type commands struct {
 	cmdMap map[string]func(*state, command) error
 }
-
+ 
 func (c *commands) Run(s *state, cmd command) error {
 	return c.cmdMap[cmd.Name](s, cmd)
 }
