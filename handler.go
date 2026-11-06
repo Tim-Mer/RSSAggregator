@@ -7,7 +7,7 @@ import (
 
 	"github.com/Tim-Mer/RSSAggregator/internal/database"
 	"github.com/google/uuid"
-)
+) 
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.Args) != 1 {
