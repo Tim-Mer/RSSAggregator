@@ -10,9 +10,11 @@ VALUES (
 )
 RETURNING *;
 
--- name: GetFeedIDs :many
-SELECT id FROM feeds;
+-- name: GetFeeds :many
+SELECT feeds.name, url, users.name FROM feeds
+JOIN users ON feeds.user_id = users.id;
 
 -- name: GetFeedWithID :one
 SELECT * FROM feeds
+WHERE id=$1;
 
