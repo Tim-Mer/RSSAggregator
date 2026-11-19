@@ -7,7 +7,7 @@ import (
 
 	"github.com/Tim-Mer/RSSAggregator/internal/database"
 	"github.com/google/uuid"
-) 
+)
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.Args) != 1 {
@@ -66,14 +66,9 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, c_user database.User) error {
 	if len(cmd.Args) != 2 {
 		return fmt.Errorf("Wrong number of arguments passed, expects feed name and URL")
-	}
-
-	c_user, err := s.DB.GetUser(context.Background(), s.ConfigPtr.CurrentUserName)
-	if err != nil {
-		return err
 	}
 
 	feed, err := s.DB.CreateFeed(context.Background(), database.CreateFeedParams{
@@ -86,9 +81,20 @@ func handlerAddFeed(s *state, cmd command) error {
 	})
 	if err != nil {
 		return err
-	} 
-
+	}
 	fmt.Println(feed)
+
+	feed_follow, err := s.DB.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    c_user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Println(feed_follow)	
 
 	return nil
 }
@@ -98,10 +104,61 @@ func handlerFeeds(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(feeds)
+	return nil
+}
 
-	
+func handlerFollow(s *state, cmd command, c_user database.User) error {
+	c_feed, err := s.DB.GetFeedWithURL(context.Background(), cmd.Args[0])
+	if err != nil {
+		return err
+	}
+
+	feed_follow, err := s.DB.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    c_user.ID,
+		FeedID:    c_feed.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(feed_follow)
+
+	return nil
+}
+
+func handlerFollowing(s *state, cmd command, c_user database.User) error {
+	feeds, err := s.DB.GetFeedFollowsForUser(context.Background(), c_user.ID)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println(feeds)
-	
+
 	return nil
+}
+
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	return func(s *state, cmd command) error {
+		c_user, err := s.DB.GetUser(context.Background(), s.ConfigPtr.CurrentUserName)
+		if err != nil {
+			return err
+		}
+		return handler(s, cmd, c_user)
+	}
+}
+
+func handlerUnfollow(s *state, cmd command, c_user database.User) error {
+	c_feed, err := s.DB.GetFeedWithURL(context.Background(), cmd.Args[0])
+	if err != nil {
+		return err
+	}
+	params := database.UnfollowFeedParams{
+		UserID: c_user.ID,
+		FeedID: c_feed.ID,
+	}
+	return s.DB.UnfollowFeed(context.Background(), params)
 }
