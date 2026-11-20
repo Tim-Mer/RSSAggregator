@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Tim-Mer/RSSAggregator/internal/database"
@@ -172,13 +173,12 @@ func handlerUnfollow(s *state, cmd command, c_user database.User) error {
 }
 
 func scrapeFeeds(s *state) error {
-	fmt.Println("Scraping")
 	feed, err := s.DB.GetNextFeedToFetch(context.Background())
 	if err != nil {
 		return err
 	}
-
-	err = s.DB.MarkFeedFetched(context.Background())
+	fmt.Printf("Scraping: %s\n", feed.Name)
+	err = s.DB.MarkFeedFetched(context.Background(), feed.ID)
 	if err != nil {
 		return err
 	}
@@ -187,10 +187,46 @@ func scrapeFeeds(s *state) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(data.Channel.Title)
-	for _, item := range data.Channel.Item {
-		fmt.Println(item.Title)
+
+	for _, post := range data.Channel.Item {
+		//fmt.Printf("Adding: %s\n", post.Title)
+		_, err := s.DB.CreatePost(context.Background(), database.CreatePostParams{
+			ID: uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Title: post.Title,
+			Url: post.Link,
+			Description: post.Description,
+			PublishedAt: post.PubDate.Time,
+			FeedID: feed.ID,
+		})
+		if err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, c_user database.User) error {
+	post_limit := 2
+	if len(cmd.Args) == 1 {
+		parsed_limit, err := strconv.Atoi(cmd.Args[0])
+		if err != nil {
+			return err
+		}
+		post_limit = parsed_limit
+	} 
+
+	posts, err := s.DB.GetPosts(context.Background(), database.GetPostsParams{
+		UserID: c_user.ID,
+		Limit: int32(post_limit),
+	})
+	if err != nil {
+		return err
+	}
+	for _, post := range posts {
+		fmt.Println(post)
+	}
 	return nil
 }
