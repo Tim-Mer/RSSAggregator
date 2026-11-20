@@ -58,12 +58,20 @@ func handlerListUsers(s *state, cmd command) error {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	feed, err := FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("Wrong number of arguments passed, expects feed name and URL")
+	}
+	timeBetweenRequests, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
 		return err
 	}
-	fmt.Println(feed)
-	return nil
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		err = scrapeFeeds(s)
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func handlerAddFeed(s *state, cmd command, c_user database.User) error {
@@ -161,4 +169,28 @@ func handlerUnfollow(s *state, cmd command, c_user database.User) error {
 		FeedID: c_feed.ID,
 	}
 	return s.DB.UnfollowFeed(context.Background(), params)
+}
+
+func scrapeFeeds(s *state) error {
+	fmt.Println("Scraping")
+	feed, err := s.DB.GetNextFeedToFetch(context.Background())
+	if err != nil {
+		return err
+	}
+
+	err = s.DB.MarkFeedFetched(context.Background())
+	if err != nil {
+		return err
+	}
+
+	data, err := FetchFeed(context.Background(), feed.Url)
+	if err != nil {
+		return err
+	}
+	fmt.Println(data.Channel.Title)
+	for _, item := range data.Channel.Item {
+		fmt.Println(item.Title)
+	}
+
+	return nil
 }
